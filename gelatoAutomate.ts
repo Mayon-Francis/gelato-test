@@ -4,100 +4,102 @@ const chainId = 80001;
 const provider = new ethers.providers.JsonRpcProvider(
   'https://rpc.dev.buildbear.io/mayon'
 );
+const targetContractAddress = '0x1027dA3acd319510d6D7a83A7604eD67BcFc03F0';
+const resolverContractAddress = '0x2763006AE23dD75C570DC9481bD9FE9608f43C1A';
 const signer = provider.getSigner();
 const automate = new AutomateSDK(chainId, signer);
 
 const targetAbi = [
-    {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "inputs": [],
-      "name": "count",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getCount",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "increaseCount",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "lastExecuted",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ];
+  {
+    inputs: [],
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+  },
+  {
+    inputs: [],
+    name: 'count',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getCount',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '_amount',
+        type: 'uint256',
+      },
+    ],
+    name: 'increaseCount',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'lastExecuted',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
 
 const resolverAbi = [
-    {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_counterAddress",
-          "type": "address"
-        }
-      ],
-      "name": "checker",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "canExec",
-          "type": "bool"
-        },
-        {
-          "internalType": "bytes",
-          "name": "execPayload",
-          "type": "bytes"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ];
+  {
+    inputs: [],
+    stateMutability: 'nonpayable',
+    type: 'constructor',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_counterAddress',
+        type: 'address',
+      },
+    ],
+    name: 'checker',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: 'canExec',
+        type: 'bool',
+      },
+      {
+        internalType: 'bytes',
+        name: 'execPayload',
+        type: 'bytes',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
 
 const targetInterface = new ethers.utils.Interface(targetAbi);
 const resolverInterface = new ethers.utils.Interface(resolverAbi);
@@ -110,7 +112,7 @@ console.log('Function called on target contract: ', {
 
 const resolverSelector = resolverInterface.getSighash('checker');
 const resolverExecData = resolverInterface.encodeFunctionData('checker', [
-  '0xDFF52C448eDfc620B551e4493d432F0d95af35Ab',
+  targetContractAddress,
 ]);
 console.log('Function called on resolver contract: ', {
   format: resolverInterface.getFunction('checker').format('minimal'),
@@ -151,15 +153,16 @@ async function createNewTask() {
 
   const params: CreateTaskOptions = {
     name: 'TEST',
-    execAddress: '0xDFF52C448eDfc620B551e4493d432F0d95af35Ab',
+    execAddress: targetContractAddress,
     execAbi: JSON.stringify(targetAbi),
     execSelector: targetSelector,
     // execData:
     //   '0x3323b467000000000000000000000000a6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa0000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000a6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000190000000000000000000000000000000000000000000000000000000000000000',
     dedicatedMsgSender: true,
     // singleExec: true,
-    resolverAddress: '0x655bCa1846990DecEf7B250E9269BCaF76De7D2b',
+    resolverAddress: resolverContractAddress,
     resolverData: resolverExecData,
+    interval: 30,
   };
   const { taskId, tx }: TaskTransaction = await automate.createTask(params);
   const receipt = await tx.wait();
@@ -173,7 +176,7 @@ async function createNewTask() {
 
 async function cancelTask() {
   const taskId =
-    '0x4145efec9fe0df95a3a8c46ab57af4b76688754cb473145d05d9834dcde4abc1';
+    '0xc0a68ed5c42e853cfd684eb1fe858fc65faaae52732357d8c017d4b8c899c8c6';
   const { tx }: TaskTransaction = await automate.cancelTask(taskId);
   const receipt = await tx.wait();
   console.log({

@@ -9,7 +9,7 @@ contract CounterResolver {
         address _counterAddress
     ) external view returns (bool canExec, bytes memory execPayload) {
         uint256 lastExecuted = Counter(_counterAddress).lastExecuted();
-        canExec = (block.timestamp - lastExecuted) > 180;
+        canExec = (block.timestamp - lastExecuted) > 60;
 
         execPayload = abi.encodeCall(Counter.increaseCount, (1));
         if (canExec) return (true, execPayload);
